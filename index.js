@@ -62,37 +62,30 @@ class ABA {
     this.options = Object.assign({}, ABA.defaults, opts);
   }
 
-  paymentToString(payment) {
+  transaction(transaction) {
     return sprintf(
       PAYMENT_FORMAT,
-      Object.assign(
-        {},
-        {
-          amount: toCents(payment.amount),
-          taxAmount: toCents(payment.taxAmount),
-        },
-        payment
-      )
+      Object.assign({}, transaction, {
+        amount: toCents(transaction.amount),
+        taxAmount: toCents(transaction.taxAmount),
+      })
     );
   }
 
-  headerToString(header) {
+  get header() {
+    const header = this.options;
     const time = moment(header.time || header.date || new Date());
 
     return sprintf(
       HEADER_FORMAT,
-      Object.assign(
-        {},
-        {
-          date: time.format('DDMMYY'),
-          time: header.time ? time.format('HHmm') : '',
-        },
-        header
-      )
+      Object.assign({}, header, {
+        date: time.format('DDMMYY'),
+        time: header.time ? time.format('HHmm') : '',
+      })
     );
   }
 
-  footerToString(payments) {
+  footer(payments) {
     const credits = payments.filter(p => p.transactionCode === ABA.CREDIT);
     const debits = payments.filter(p => p.transactionCode === ABA.DEBIT);
     const credit = sum(credits.map(c => c.amount));
@@ -115,14 +108,10 @@ class ABA {
       throw new Error('Please pass in at least one payment');
     }
     const formatted = transactions.map(payment =>
-      this.paymentToString(Object.assign({}, ABA.PAYMENT_DEFAULTS, payment))
+      this.transaction(Object.assign({}, ABA.PAYMENT_DEFAULTS, payment))
     );
-
-    return [
-      this.headerToString(this.options),
-      ...formatted,
-      this.footerToString(transactions),
-    ].join('\r\n');
+    const footer = this.footer(transactions);
+    return [this.header, ...formatted, footer].join('\r\n');
   }
 }
 
