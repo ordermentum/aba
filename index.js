@@ -6,11 +6,11 @@ const toCents = number =>
   new BigNumber(number)
     .round(2)
     .times(100)
-    .toFixed(2);
+    .toFixed(0);
 const sum = totals =>
   totals.reduce((p, v) => p.add(v), new BigNumber(0)).toFixed(2);
 const difference = (credit, debit) =>
-  new BigNumber(credit).sub(debit).toFixed(2);
+  Math.abs(new BigNumber(credit).sub(debit).toFixed(2));
 
 const PAYMENT_FORMAT = [
   '1',
@@ -72,34 +72,39 @@ class ABA {
     );
   }
 
-  get header() {
+  formatHeader() {
+    return sprintf(HEADER_FORMAT, this.getHeader());
+  }
+
+  getHeader() {
     const header = this.options;
     const time = moment(header.time || header.date || new Date());
 
-    return sprintf(
-      HEADER_FORMAT,
-      Object.assign({}, header, {
-        date: time.format('DDMMYY'),
-        time: header.time ? time.format('HHmm') : '',
-      })
-    );
+    return Object.assign({}, header, {
+      date: time.format('DDMMYY'),
+      time: header.time ? time.format('HHmm') : '',
+    });
   }
 
-  footer(payments) {
-    const credits = payments.filter(p => p.transactionCode === ABA.CREDIT);
-    const debits = payments.filter(p => p.transactionCode === ABA.DEBIT);
+  formatFooter(transactions) {
+    return sprintf(FOOTER_FORMAT, this.getFooter(transactions));
+  }
+
+  getFooter(transactions) {
+    const credits = transactions.filter(p => p.transactionCode === ABA.CREDIT);
+    const debits = transactions.filter(p => p.transactionCode === ABA.DEBIT);
     const credit = sum(credits.map(c => c.amount));
     const debit = sum(debits.map(d => d.amount));
 
-    return sprintf(FOOTER_FORMAT, {
+    return {
       // According to spec the net total was supposed to be an unsigned value of
       // credit minus debit (with no mention of underflow), but turns out they
       // really meant merely the difference between credit and debit.
       net: toCents(difference(credit, debit)),
       credit: toCents(credit),
       debit: toCents(debit),
-      length: payments.length,
-    });
+      length: transactions.length,
+    };
   }
 
   generate(transactions = []) {
@@ -110,8 +115,8 @@ class ABA {
     const formatted = transactions.map(payment =>
       this.transaction(Object.assign({}, ABA.PAYMENT_DEFAULTS, payment))
     );
-    const footer = this.footer(transactions);
-    return [this.header, ...formatted, footer].join('\r\n');
+    const footer = this.formatFooter(transactions);
+    return [this.formatHeader(), ...formatted, footer].join('\r\n');
   }
 }
 

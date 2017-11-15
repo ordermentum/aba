@@ -101,7 +101,7 @@ describe('ABA', () => {
       footer += '                                        '; // Reserved
       expect(footer.length).toBe(120);
 
-      const payment = Object.assign({ amount: 0 }, PAYMENT);
+      const payment = Object.assign({}, PAYMENT, { amount: 0 });
       const payments = [payment, payment, payment];
       const rows = aba.generate(payments).split(/\r\n/);
       expect(rows[4]).toBe(footer);
@@ -208,22 +208,22 @@ describe('ABA', () => {
         remitter: 'Vault',
       };
 
-      const creditA = Object.assign(
-        { amount: 1337.42, transactionCode: 50 },
-        defaults
-      );
-      const creditB = Object.assign(
-        { amount: 512.64, transactionCode: 50 },
-        defaults
-      );
-      const debitA = Object.assign(
-        { amount: 666.69, transactionCode: 13 },
-        defaults
-      );
-      const debitB = Object.assign(
-        { amount: 616.66, transactionCode: 13 },
-        defaults
-      );
+      const creditA = Object.assign({}, defaults, {
+        amount: 1337.42,
+        transactionCode: 50,
+      });
+      const creditB = Object.assign({}, defaults, {
+        amount: 512.64,
+        transactionCode: 50,
+      });
+      const debitA = Object.assign({}, defaults, {
+        amount: 666.69,
+        transactionCode: 13,
+      });
+      const debitB = Object.assign({}, defaults, {
+        amount: 616.66,
+        transactionCode: 13,
+      });
       const payments = [creditA, debitA, creditB, debitB];
 
       let footer = '';
@@ -245,17 +245,29 @@ describe('ABA', () => {
       });
 
       const payments = [
-        Object.assign({ transactionCode: ABA.CREDIT, amount: 666.66 }, PAYMENT),
-        Object.assign({ transactionCode: ABA.DEBIT, amount: 1337.42 }, PAYMENT),
+        Object.assign({}, PAYMENT, {
+          transactionCode: ABA.CREDIT,
+          amount: 666.66,
+        }),
+        Object.assign({}, PAYMENT, {
+          transactionCode: ABA.DEBIT,
+          amount: 1337.42,
+        }),
       ];
 
-      let footer = '';
-      footer += '0000067076'; // Credit minus debit total
-      footer += '0000066666'; // Credit total
-      footer += '0000133742'; // Debit total
+      const footer = aba.getFooter(payments);
+      expect(footer.length).toBe(2);
+      expect(footer.credit).toBe('66666');
+      expect(footer.debit).toBe('133742');
+      expect(footer.net).toBe('67076');
+
+      let result = '';
+      result += '0000067076'; // Credit minus debit total
+      result += '0000066666'; // Credit total
+      result += '0000133742'; // Debit total
 
       const rows = aba.generate(payments).split(/\r\n/);
-      expect(rows[3].substr(20, 30)).toBe(footer);
+      expect(rows[3].substr(20, 30)).toBe(result);
     });
   });
 });
