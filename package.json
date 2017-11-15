@@ -1,0 +1,38 @@
+{
+  "name": "aba",
+  "version": "1.0.0",
+  "description": "ABA file generation",
+  "main": "index.js",
+  "repository": "git@github.com:ordermentum/aba.git",
+  "author": "engineering@ordermentum.com",
+  "license": "Apache-2",
+  "devDependencies": {
+    "eslint": "^4.10.0",
+    "eslint-config-ordermentum": "^0.0.2",
+    "flow": "flow check",
+    "flow-bin": "^0.57.3",
+    "flow-typed": "^2.2.1",
+    "husky": "^0.14.3",
+    "jest": "^21.2.1",
+    "lint-staged": "^4.3.0"
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "flow": "flow check",
+    "start": "./bin/app",
+    "lint": "eslint .",
+    "jest": "jest --forceExit",
+    "jest:watch": "jest --watch"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix --max-warnings 0 --no-ignore",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "bignumber.js": "^4.1.0",
+    "moment": "^2.19.2",
+    "printf": "^0.2.5"
+  }
+}
