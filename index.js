@@ -2,15 +2,15 @@ const moment = require('moment');
 const BigNumber = require('bignumber.js');
 const sprintf = require('printf');
 
-const toCents = number =>
+const toCents = (number = 0) =>
   new BigNumber(number)
     .round(2)
     .times(100)
     .toFixed(0);
 const sum = totals =>
-  totals.reduce((p, v) => p.add(v), new BigNumber(0)).toFixed(2);
+  totals.reduce((p, v) => p.add(new BigNumber(v)), new BigNumber(0)).toFixed(2);
 const difference = (credit, debit) =>
-  Math.abs(new BigNumber(credit).sub(debit).toFixed(2));
+  Math.abs(new BigNumber(credit).sub(new BigNumber(debit)).toFixed(2));
 
 const PAYMENT_FORMAT = [
   '1',
