@@ -12,6 +12,11 @@ const sum = totals =>
 const difference = (credit, debit) =>
   Math.abs(new BigNumber(credit).sub(new BigNumber(debit)).toFixed(2));
 
+const format = bsb => {
+  const value = bsb.replace(/(\s|-)+/, '');
+  return `${value.slice(0, 3)}-${value.slice(3, 6)}`;
+};
+
 const PAYMENT_FORMAT = [
   '1',
   '%(bsb)7s',
@@ -67,6 +72,7 @@ class ABA {
       PAYMENT_FORMAT,
       Object.assign({}, transaction, {
         amount: toCents(transaction.amount),
+        bsb: format(transaction.bsb),
         taxAmount: toCents(transaction.taxAmount),
       })
     );

@@ -13,7 +13,7 @@ describe('ABA', () => {
 
   it('generates', () => {
     const aba = new ABA({
-      bsb: '',
+      bsb: '123123',
       account: '',
       bank: '',
       user: '',
@@ -33,6 +33,9 @@ describe('ABA', () => {
       remitter: '1235',
       taxAmount: 12,
     };
-    expect(aba.generate([transaction])).not.toBe(undefined);
+    const file = aba.generate([transaction]);
+    expect(file).not.toBe(undefined);
+    const lines = file.split('\r\n');
+    expect(lines[1].slice(0, 3)).toBe('106');
   });
 });

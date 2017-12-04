@@ -199,7 +199,7 @@ describe('ABA', () => {
       });
 
       const defaults = {
-        bsb: '666-1337',
+        bsb: '666-133',
         account: '123456',
         accountTitle: 'Transfer',
         reference: 'Order 132',
