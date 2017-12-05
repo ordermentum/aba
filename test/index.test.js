@@ -13,13 +13,14 @@ describe('ABA', () => {
 
   it('generates', () => {
     const aba = new ABA({
-      bsb: '123123',
-      account: '',
-      bank: '',
-      user: '',
+      bsb: '012-030',
+      account: '111111111',
+      bank: 'ANZ',
+      user: 'A USERNAME',
       userNumber: 1234,
       description: 'Creditors',
     });
+
     const transaction = {
       bsb: '061021',
       tax: 10,

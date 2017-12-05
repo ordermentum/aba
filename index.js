@@ -13,8 +13,8 @@ const difference = (credit, debit) =>
   Math.abs(new BigNumber(credit).sub(new BigNumber(debit)).toFixed(2));
 
 const format = bsb => {
-  const value = bsb.replace(/(\s|-)+/, '');
-  return `${value.slice(0, 3)}-${value.slice(3, 6)}`;
+  const value = bsb.replace(/(\s|-)+/, '').trim();
+  return value ? `${value.slice(0, 3)}-${value.slice(3, 6)}` : '';
 };
 
 const PAYMENT_FORMAT = [
@@ -41,25 +41,25 @@ const HEADER_FORMAT = [
   ' ',
   '01',
   '%(bank)-3s',
-  '       ',
+  ' '.repeat(7),
   '%(user)-26s',
   '%(userNumber)06d',
   '%(description)-12s',
   '%(date)6s',
   '%(time)4s',
-  '                                    ',
+  ' '.repeat(36),
 ].join('');
 
 const FOOTER_FORMAT = [
   '7',
   '999-999',
-  '            ',
+  ' '.repeat(12),
   '%(net)010d',
   '%(credit)010d',
   '%(debit)010d',
-  '                        ',
+  ' '.repeat(24),
   '%(length)06d',
-  '                                        ',
+  ' '.repeat(40),
 ].join('');
 
 class ABA {
@@ -73,6 +73,8 @@ class ABA {
       Object.assign({}, transaction, {
         amount: toCents(transaction.amount),
         bsb: format(transaction.bsb),
+        account: transaction.account.trim(),
+        traceBsb: format(transaction.traceBsb),
         taxAmount: toCents(transaction.taxAmount),
       })
     );
@@ -88,6 +90,7 @@ class ABA {
 
     return Object.assign({}, header, {
       date: time.format('DDMMYY'),
+      bsb: format(header.bsb),
       time: header.time ? time.format('HHmm') : '',
     });
   }
